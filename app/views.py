@@ -120,7 +120,7 @@ def add_note_view(request):
         if form.is_valid():
             note = form.save(commit=False)
             category_name = request.POST.get('category')
-            category = Category.objects.get_or_create(name=category_name)
+            category, created = Category.objects.get_or_create(name=category_name)
             note.category = category
             note.save()
             messages.success(request, 'Note added successfully!')
