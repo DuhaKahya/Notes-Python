@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weekly Notes App</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'notes.css' %}">
+    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
+</head>
+<body>
+
+    <div class="logout-container">
+        <button class="logout-button" onclick="window.location.href='{% url 'logout' %}'">Logout</button>
+    </div>
+
+    <div class="header">
+        <div class="week-arrows">
+            <a href="?week={{ week_offset|add:-1 }}">
+                <span class="arrow" id="prev-week">⬅</span>
+            </a>
+        </div>
+        <div class="date-container">
+            <h1>Notes</h1>
+            <div class="date" id="current-week">
+                {{ start_of_week|date:"d F" }} - {{ end_of_week|date:"d F" }}
+            </div>
+        </div>
+        <div class="week-arrows">
+            <a href="?week={{ week_offset|add:1 }}">
+                <span class="arrow" id="next-week">➡</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="notes-container">
+
+        <div class="notes-category">
+            <h2>Good Things</h2>
+            <div class="note-row" id="good-things">
+                {% for note in notes_by_category.good_things %}
+                    <div class="note">
+                        <h3>{{ note.title }}</h3>
+                        <p>{{ note.content }}</p>
+                        <button class="edit-note" onclick="openEditModal({{ note.id }}, '{{ note.title }}', '{{ note.content }}')">Edit</button>
+                        <button class="delete-note" onclick="openDeleteModal({{ note.id }}, '{{ note.title }}')">Delete</button>
+                    </div>
+                {% empty %}
+                    <p>No notes in this category yet.</p>
+                {% endfor %}
+            </div>
+            <button class="add-note" data-category="good-things">Add Note</button>
+        </div>
+
+        <div class="notes-category">
+            <h2>Bad Things</h2>
+            <div class="note-row" id="bad-things">
+                {% for note in notes_by_category.bad_things %}
+                    <div class="note">
+                        <h3>{{ note.title }}</h3>
+                        <p>{{ note.content }}</p>
+                        <button class="edit-note" onclick="openEditModal({{ note.id }}, '{{ note.title }}', '{{ note.content }}')">Edit</button>
+                        <button class="delete-note" onclick="openDeleteModal({{ note.id }}, '{{ note.title }}')">Delete</button>
+                    </div>
+                {% empty %}
+                    <p>No notes in this category yet.</p>
+                {% endfor %}
+            </div>
+            <button class="add-note" data-category="bad-things">Add Note</button>
+        </div>
+
+        <div class="notes-category">
+            <h2>Interest</h2>
+            <div class="note-row" id="interest">
+                {% for note in notes_by_category.interest %}
+                    <div class="note">
+                        <h3>{{ note.title }}</h3>
+                        <p>{{ note.content }}</p>
+                        <button class="edit-note" onclick="openEditModal({{ note.id }}, '{{ note.title }}', '{{ note.content }}')">Edit</button>
+                        <button class="delete-note" onclick="openDeleteModal({{ note.id }}, '{{ note.title }}')">Delete</button>
+                    </div>
+                {% empty %}
+                    <p>No notes in this category yet.</p>
+                {% endfor %}
+            </div>
+            <button class="add-note" data-category="interest">Add Note</button>
+        </div>
+
+        <div class="notes-category">
+            <h2>To Do</h2>
+            <div class="note-row" id="to-do">
+                {% for note in notes_by_category.to_do %}
+                    <div class="note">
+                        <h3>{{ note.title }}</h3>
+                        <p>{{ note.content }}</p>
+                        <button class="edit-note" onclick="openEditModal({{ note.id }}, '{{ note.title }}', '{{ note.content }}')">Edit</button>
+                        <button class="delete-note" onclick="openDeleteModal({{ note.id }}, '{{ note.title }}')">Delete</button>
+                    </div>
+                {% empty %}
+                    <p>No notes in this category yet.</p>
+                {% endfor %}
+            </div>
+            <button class="add-note" data-category="to-do">Add Note</button>
+        </div>
+    </div>
+
+    <div id="add-note-form-modal" class="modal" style="display: none">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add Note</h2>
+                <button class="close-button" onclick="closeAddNoteModal()">&times;</button>
+            </div>
+            <form id="add-note-form" method="post" action="{% url 'add_note' %}">
+                {% csrf_token %}
+                <input type="hidden" name="category" id="note-category">
+                <label for="title">Title:</label>
+                <input type="text" name="title" id="note-title" required>
+                <label for="content">Content:</label>
+                <textarea name="content" id="note-content" required></textarea>
+                <button type="submit">Save Note</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="edit-note-form-modal" class="modal" style="display: none">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Note</h2>
+                <button class="close-button" onclick="closeEditNoteModal()">&times;</button>
+            </div>
+            <form id="edit-note-form" method="post" action="#">
+                {% csrf_token %}
+                <input type="hidden" name="note_id" id="edit-note-id">
+                <label for="edit-title">Title:</label>
+                <input type="text" name="title" id="edit-note-title" required>
+                <label for="edit-content">Content:</label>
+                <textarea name="content" id="edit-note-content" required></textarea>
+                <button type="submit">Save Changes</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="delete-confirmation-modal" class="modal" style="display: none">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Confirm Delete</h2>
+                <button class="close-button" onclick="closeDeleteConfirmationModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the note "<span id="delete-note-title"></span>"?</p>
+                <form id="delete-form" method="post" action="#">
+                    {% csrf_token %}
+                    <button type="submit">Yes, Delete</button>
+                    <button type="button" onclick="closeDeleteConfirmationModal()">Cancel</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.querySelectorAll('.add-note').forEach(button => {
+            button.addEventListener('click', () => {
+                const category = button.getAttribute('data-category');
+                document.getElementById('note-category').value = category;
+                document.getElementById('note-title').value = '';
+                document.getElementById('note-content').value = '';
+                document.getElementById('add-note-form-modal').style.display = 'flex'; 
+            });
+        });
+
+        function closeAddNoteModal() {
+            document.getElementById('add-note-form-modal').style.display = 'none'; 
+        }
+
+        function openEditModal(noteId, title, content) {
+            document.getElementById('edit-note-id').value = noteId;
+            document.getElementById('edit-note-title').value = title;
+            document.getElementById('edit-note-content').value = content;
+            document.getElementById('edit-note-form').action = `{% url 'edit_note' note_id=0 %}`.replace('0', noteId);
+            document.getElementById('edit-note-form-modal').style.display = 'flex';
+        }
+
+        function closeEditNoteModal() {
+            document.getElementById('edit-note-form-modal').style.display = 'none';
+        }
+
+        function openDeleteModal(noteId, title) {
+            document.getElementById('delete-note-title').innerText = title;
+            document.getElementById('delete-form').action = `{% url 'delete_note' note_id=0 %}`.replace('0', noteId);
+            document.getElementById('delete-confirmation-modal').style.display = 'flex';
+        }
+
+        function closeDeleteConfirmationModal() {
+            document.getElementById('delete-confirmation-modal').style.display = 'none';
+        }
+
+        window.addEventListener('click', (event) => {
+            if (event.target === document.getElementById('add-note-form-modal')) {
+                closeAddNoteModal();
+            }
+            if (event.target === document.getElementById('edit-note-form-modal')) {
+                closeEditNoteModal();
+            }
+            if (event.target === document.getElementById('delete-confirmation-modal')) {
+                closeDeleteConfirmationModal();
+            }
+        });
+
+    </script>
+</body>
+</html>

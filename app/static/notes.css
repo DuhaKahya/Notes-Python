@@ -1,0 +1,216 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+}
+
+.logout-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 10px;
+}
+
+.logout-button {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+.logout-button:hover {
+    background-color: #c82333;
+}
+
+.header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+    text-align: center;
+    position: relative;
+}
+
+.date-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.week-arrows {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 20px;
+}
+
+.arrow {
+    font-size: 40px;
+    cursor: pointer;
+    padding: 0 20px;
+}
+
+.date {
+    font-size: 20px;
+    text-align: center;
+}
+
+.notes-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.notes-category {
+    width: 23%;
+}
+
+.notes-category h2 {
+    font-size: 20px;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.note-row {
+    border: 1px solid #ccc;
+    padding: 10px;
+    min-height: 150px;
+    background-color: #f9f9f9;
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    border-radius: 5px;
+}
+
+.note {
+    margin-bottom: 10px;
+    background-color: #e2e6ea;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.note-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.edit-note, .delete-note {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.edit-note:hover {
+    background-color: #0056b3;
+    transform: scale(1.05);
+}
+
+.delete-note {
+    background-color: #dc3545;
+}
+
+.delete-note:hover {
+    background-color: #c82333;
+    transform: scale(1.05);
+}
+
+.add-note {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    width: 100%;
+    margin-top: auto;
+    text-align: center;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+.add-note:hover {
+    background-color: #0056b3;
+}
+
+.modal {
+    display: flex;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    transition: opacity 0.3s;
+}
+
+.modal-content {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 500px;
+    width: 100%;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s;
+    transform: scale(0.9);
+}
+
+.modal-content.show {
+    transform: scale(1);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.modal-header h2 {
+    margin: 0;
+}
+
+.close-button {
+    background: transparent;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: #333;
+}
+
+.modal-content label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.modal-content input,
+.modal-content textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.modal-content button {
+    padding: 10px 15px;
+    background-color: #007bff;
+    border: none;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.modal-content button:hover {
+    background-color: #0056b3;
+}
