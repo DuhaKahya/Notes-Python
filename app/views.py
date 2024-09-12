@@ -1,5 +1,4 @@
 from django import forms
-from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -33,10 +32,10 @@ class RegistrationView(FormView):
     success_url = reverse_lazy('login')
 
     def form_valid(self, form):
+        User.objects.create_user()
         user = form.save(commit=False)
         user.set_password(form.cleaned_data['password'])
         user.save()
-        messages.success(self.request, 'Registration successful!')
         return super().form_valid(form)
 
 class LoginForm(forms.Form):
@@ -54,13 +53,13 @@ class LoginView(FormView):
         user = authenticate(self.request, username=username, password=password)
         if user is not None:
             login(self.request, user)
-            messages.success(self.request, 'Login successful!')
             return super().form_valid(form)
         else:
             form.add_error(None, 'Invalid username or password')
             return self.form_invalid(form)
 
 class NoteForm(forms.ModelForm):
+    # Constructor, calls when created an instance of a class
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
@@ -77,7 +76,6 @@ class NoteForm(forms.ModelForm):
             note.save()
         return note
 
-
 class NotesView(LoginRequiredMixin, FormView):
     template_name = 'notes.html'
     form_class = NoteForm
@@ -86,51 +84,58 @@ class NotesView(LoginRequiredMixin, FormView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
+        # Get the current week offset for filtering notes
         week_offset = int(self.request.GET.get('week', 0))
-
         today = now().date()
-
         start_of_week = today - timedelta(days=today.weekday()) + timedelta(weeks=week_offset)
         end_of_week = start_of_week + timedelta(days=6)
 
+        # Filter notes based on the current week and user
         notes = Note.objects.filter(
             user=self.request.user,
             created_at__date__gte=start_of_week,
             created_at__date__lte=end_of_week
         )
 
-        context['notes_by_category'] = {
-            'good_things': notes.filter(category__name='good-things'),
-            'bad_things': notes.filter(category__name='bad-things'),
-            'interest': notes.filter(category__name='interest'),
-            'to_do': notes.filter(category__name='to-do'),
-        }
+        # Dynamically fetch all categories
+        categories = Category.objects.all()
 
+        # Create a dictionary to store notes for each category
+        notes_by_category = {}
+        for category in categories:
+            notes_by_category[category.name] = notes.filter(category=category)
+
+        context['categories'] = categories
+        context['notes_by_category'] = notes_by_category
         context['start_of_week'] = start_of_week
         context['end_of_week'] = end_of_week
         context['week_offset'] = week_offset
 
         return context
 
-@csrf_protect
+
 @login_required
+@csrf_protect
 def add_note_view(request):
     if request.method == 'POST':
         form = NoteForm(request.POST, request=request)
         if form.is_valid():
             note = form.save(commit=False)
             category_name = request.POST.get('category')
-            category, created = Category.objects.get_or_create(name=category_name)
+
+            try:
+                category = Category.objects.get(name=category_name)
+            except Category.DoesNotExist:
+                return render(request, 'notes.html', {'form': form})
+
             note.category = category
             note.save()
-            messages.success(request, 'Note added successfully!')
             return redirect('notes')
-        else:
-            messages.error(request, 'Error adding note.')
     else:
         form = NoteForm()
 
     return render(request, 'notes.html', {'form': form})
+
 
 def logout_view(request):
     logout(request)
@@ -144,10 +149,7 @@ def edit_note_view(request, note_id):
         form = NoteForm(request.POST, instance=note)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Note updated successfully!')
             return redirect('notes')
-        else:
-            messages.error(request, 'Error updating note.')
     else:
         form = NoteForm(instance=note)
 
@@ -158,6 +160,5 @@ def delete_note_view(request, note_id):
     note = get_object_or_404(Note, id=note_id, user=request.user)
     if request.method == 'POST':
         note.delete()
-        messages.success(request, 'Note deleted successfully!')
         return redirect('notes')
     return HttpResponseRedirect(reverse_lazy('notes'))

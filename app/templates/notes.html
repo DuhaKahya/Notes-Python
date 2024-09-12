@@ -34,74 +34,24 @@
     </div>
 
     <div class="notes-container">
-
-        <div class="notes-category">
-            <h2>Good Things</h2>
-            <div class="note-row" id="good-things">
-                {% for note in notes_by_category.good_things %}
-                    <div class="note">
-                        <h3>{{ note.title }}</h3>
-                        <p>{{ note.content }}</p>
-                        <button class="edit-note" onclick="openEditModal({{ note.id }}, '{{ note.title }}', '{{ note.content }}')">Edit</button>
-                        <button class="delete-note" onclick="openDeleteModal({{ note.id }}, '{{ note.title }}')">Delete</button>
-                    </div>
-                {% empty %}
-                    <p>No notes in this category yet.</p>
-                {% endfor %}
+        {% for category, notes in notes_by_category.items %}
+            <div class="notes-category">
+                <h2>{{ category|title }}</h2>
+                <div class="note-row" id="{{ category }}">
+                    {% for note in notes %}
+                        <div class="note">
+                            <h3>{{ note.title }}</h3>
+                            <p>{{ note.content }}</p>
+                            <button class="edit-note" onclick="openEditModal({{ note.id }}, '{{ note.title }}', '{{ note.content }}')">Edit</button>
+                            <button class="delete-note" onclick="openDeleteModal({{ note.id }}, '{{ note.title }}')">Delete</button>
+                        </div>
+                    {% empty %}
+                        <p>No notes in this category yet.</p>
+                    {% endfor %}
+                </div>
+                <button class="add-note" data-category="{{ category }}">Add Note</button>
             </div>
-            <button class="add-note" data-category="good-things">Add Note</button>
-        </div>
-
-        <div class="notes-category">
-            <h2>Bad Things</h2>
-            <div class="note-row" id="bad-things">
-                {% for note in notes_by_category.bad_things %}
-                    <div class="note">
-                        <h3>{{ note.title }}</h3>
-                        <p>{{ note.content }}</p>
-                        <button class="edit-note" onclick="openEditModal({{ note.id }}, '{{ note.title }}', '{{ note.content }}')">Edit</button>
-                        <button class="delete-note" onclick="openDeleteModal({{ note.id }}, '{{ note.title }}')">Delete</button>
-                    </div>
-                {% empty %}
-                    <p>No notes in this category yet.</p>
-                {% endfor %}
-            </div>
-            <button class="add-note" data-category="bad-things">Add Note</button>
-        </div>
-
-        <div class="notes-category">
-            <h2>Interest</h2>
-            <div class="note-row" id="interest">
-                {% for note in notes_by_category.interest %}
-                    <div class="note">
-                        <h3>{{ note.title }}</h3>
-                        <p>{{ note.content }}</p>
-                        <button class="edit-note" onclick="openEditModal({{ note.id }}, '{{ note.title }}', '{{ note.content }}')">Edit</button>
-                        <button class="delete-note" onclick="openDeleteModal({{ note.id }}, '{{ note.title }}')">Delete</button>
-                    </div>
-                {% empty %}
-                    <p>No notes in this category yet.</p>
-                {% endfor %}
-            </div>
-            <button class="add-note" data-category="interest">Add Note</button>
-        </div>
-
-        <div class="notes-category">
-            <h2>To Do</h2>
-            <div class="note-row" id="to-do">
-                {% for note in notes_by_category.to_do %}
-                    <div class="note">
-                        <h3>{{ note.title }}</h3>
-                        <p>{{ note.content }}</p>
-                        <button class="edit-note" onclick="openEditModal({{ note.id }}, '{{ note.title }}', '{{ note.content }}')">Edit</button>
-                        <button class="delete-note" onclick="openDeleteModal({{ note.id }}, '{{ note.title }}')">Delete</button>
-                    </div>
-                {% empty %}
-                    <p>No notes in this category yet.</p>
-                {% endfor %}
-            </div>
-            <button class="add-note" data-category="to-do">Add Note</button>
-        </div>
+        {% endfor %}
     </div>
 
     <div id="add-note-form-modal" class="modal" style="display: none">
@@ -157,7 +107,7 @@
         </div>
     </div>
 
-    <script>
+        <script>
         document.querySelectorAll('.add-note').forEach(button => {
             button.addEventListener('click', () => {
                 const category = button.getAttribute('data-category');
