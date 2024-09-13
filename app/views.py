@@ -3,6 +3,8 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render, get_object_or_404
 from django.urls import reverse_lazy
@@ -32,11 +34,28 @@ class RegistrationView(FormView):
     success_url = reverse_lazy('login')
 
     def form_valid(self, form):
-        User.objects.create_user()
+        password = form.cleaned_data['password']
+
+        try:
+            validate_password(password)
+        except ValidationError as e:
+            form.add_error('password', e.messages)
+            return self.form_invalid(form)
+        
+        
         user = form.save(commit=False)
         user.set_password(form.cleaned_data['password'])
         user.save()
-        return super().form_valid(form)
+                
+        return render(self.request, self.template_name, {
+            'form': self.get_form(),
+            'account_created': True 
+        })
+    
+    def form_invalid(self, form):
+        return render(self.request, self.template_name, {
+            'form': form
+    })
 
 class LoginForm(forms.Form):
     username = forms.CharField()
@@ -50,7 +69,9 @@ class LoginView(FormView):
     def form_valid(self, form):
         username = form.cleaned_data['username']
         password = form.cleaned_data['password']
+        
         user = authenticate(self.request, username=username, password=password)
+        
         if user is not None:
             login(self.request, user)
             return super().form_valid(form)
